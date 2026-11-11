@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794370701,
-        "narHash": "sha256-kf15t8jRFNGClYTctO8sFSakVxoIWfsiKXEo4YY1LvE=",
+        "lastModified": 1794370762,
+        "narHash": "sha256-ZgLjO9ctiBYCLPh1Xo3JC2E9YVzUHlDqj1fJ6FxyVbk=",
         "owner": "AriSweedler",
         "repo": "ari-zshlib",
-        "rev": "8b799f5b5590adecdd8cfd552386bf93e036f11f",
+        "rev": "593b678dec3bbc114e53772df38a900a7851c6eb",
         "type": "github"
       },
       "original": {

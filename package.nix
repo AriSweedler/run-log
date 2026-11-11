@@ -35,6 +35,8 @@ stdenvNoCC.mkDerivation {
     grep -qx hello $TMPDIR/caps/*/stdout.plain
     grep -qx exit=0 $TMPDIR/caps/*/metadata
     [[ "$(printf '\033[31mred\033[0m' | $out/bin/strip-ansi)" == red ]]
+    # Every library file the bins name exists in the pinned ari-zshlib.
+    for f in log.zsh strip_ansi.zsh tmux-pane.sh; do [[ -r ${zshlib}/lib/$f ]] || { echo "ari-zshlib lacks $f"; exit 1; }; done
   '';
 
   meta.mainProgram = "run_log";

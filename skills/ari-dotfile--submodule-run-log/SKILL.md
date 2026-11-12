@@ -49,7 +49,7 @@ change that section with any change to the contract, and never restate it here.
 ### The build
 
 - `~/dotfiles/.config/dotfiles/nix/pkgs/default.nix` builds `"${devInputs.run-log}/package.nix"` with `zshlib = self.ari_zshlib`; `ari-bins.nix` places the bins at `~/.config/bin/` (`/ari-dotfiles-nix` § Ari's packages).
-- `dotfiles switch` locks the `run-log` input at the checkout's HEAD in `~/.local/share/dotfiles/nix/flake.lock`, then builds; so does `--build`, which activates nothing.
+- What `dotfiles switch` (and `--build`, which activates nothing) builds, and the local lock it writes first, are `/ari-dotfile--submodule` § How the build and the lock follow the checkout.
 - **Check** is `nix build --no-link path:$HOME/dotfiles/.config/run-log`: the standalone flake and its install check (`installCheckPhase`: a capture of `echo hello` lands with `exit=0`; `strip-ansi` strips a color). It builds the working tree, untracked files included; the switch builds HEAD only.
 - A host without Nix gets no `run_log` from the dotfiles.
 
@@ -77,7 +77,7 @@ change that section with any change to the contract, and never restate it here.
 
 ### Set up a machine
 
-`dotfiles apply dotfiles_repo` clones the checkout. No step pins its identity: `git -C ~/.config/run-log config user.name "Ari Sweedler"` and `git -C ~/.config/run-log config user.email ari@sweedler.com`. Then `dotfiles switch`. After a pull moves the checkout, switch again.
+`dotfiles apply dotfiles_repo` clones the checkout; pin its identity per `/ari-dotfile--submodule` § Layout contract (a packaged repo). Then `dotfiles switch`. After a pull moves the checkout, switch again.
 
 ## When it fails
 
@@ -86,7 +86,7 @@ Generic rows (detached HEAD, push log lines, lock-bump refusals): `/ari-dotfile-
 | symptom | cause | do |
 |---|---|---|
 | healthcheck `fail dotfiles_repo submodule_undocumented ~/.claude/skills lacks ari-dotfile--submodule-run-log …` | this skill uncommitted, or committed after the last switch | `git -C ~/.config/run-log add skills/ari-dotfile--submodule-run-log`, commit (step 5), switch; ignore the healthcheck's registry `link` fix line |
-| `~/.config/bin/run_log` lacks a change | uncommitted, or committed after the last switch | `jq -er '.nodes["run-log"].locked.rev' ~/.local/share/dotfiles/nix/flake.lock` against `git -C ~/.config/run-log rev-parse HEAD`: differ → switch; equal after a `--build` alone → switch (`--build` moved the lock, not `~/.config/bin`); HEAD an ancestor of the locked rev → `git -C ~/.config/run-log pull --ff-only origin main` first. Until then run `zsh ~/dotfiles/.config/run-log/bin/run_log …`; NEVER copy it into `~/.config/bin` |
+| `~/.config/bin/run_log` lacks a change | uncommitted, or committed after the last switch | `jq -er '.nodes["run-log"].locked.rev' ~/.local/share/dotfiles/nix/flake.lock` against `git -C ~/.config/run-log rev-parse HEAD`: differ → switch; equal → switch too unless the last full switch after the commit succeeded (an equal lock proves no build: `/ari-dotfile--submodule` § How the build and the lock follow the checkout); HEAD an ancestor of the locked rev → `git -C ~/.config/run-log pull --ff-only origin main` first. Until then run `zsh ~/dotfiles/.config/run-log/bin/run_log …`; NEVER copy it into `~/.config/bin` |
 | `substituteStream() in derivation run-log-0: ERROR: pattern … doesn't match anything` | a live default changed without `package.nix` | update its `package.nix` line (Rules table) |
 | **Check** fails in `installCheckPhase` | the capture did not land, or `strip-ansi` kept an escape | run step 2 against the checkout and read its capture |
 | the standalone build's `run_log` cannot source a library file (e.g. `tmux-pane.sh` on `--deliver-to`) | `flake.lock` pins an ari-zshlib older than the file | a library change not yet published → Ari's `dotfiles push` first, which exports and pushes the mirror; then `nix flake update ari-zshlib --refresh --flake path:$HOME/dotfiles/.config/run-log` (`--refresh` because Nix caches a GitHub ref for about an hour, so without it a just-pushed mirror locks the older commit again), commit as `build(nix): …` |
